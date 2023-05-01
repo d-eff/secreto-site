@@ -34,7 +34,22 @@ const Year = {
     }
 }
 
-export { User, Gift, Year };
+const Session = {
+    token: {
+        type: DataTypes.TEXT,
+        primaryKey: true
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        unique: true
+    },
+    ttl: {
+        type: DataTypes.INTEGER
+    }
+}
+
+export { User, Gift, Year, Session };
 
 
 

@@ -2,14 +2,14 @@ import { Request, Response } from 'express';
 import db from '../db';
 import bcrypt from 'bcrypt';
 
-async function createUser (req: Request, res: Response) {
+async function createUser(req: Request, res: Response) {
     const User = db.models.User;
     const hash = await bcrypt.hash(req.body.password, 4);
     const createdUser = await User.create({ email: req.body.email, passhash: hash });
     res.json(createdUser)
 }
 
-async function getUser (req: Request, res: Response) {
+async function getUser(req: Request, res: Response) {
     const User = db.models.User;
     const foundUser = await User.findAll({
         where: {
@@ -19,12 +19,14 @@ async function getUser (req: Request, res: Response) {
     res.json(foundUser);
 }
 
-function editUser (req: Request, res: Response) {
+function editUser(req: Request, res: Response) {
     console.log(req.params.userId);
+    res.json({ message: "not implemented" });
 }
 
-function deleteUser (req: Request, res: Response) {
+function deleteUser(req: Request, res: Response) {
     console.log(req.params.userId);
+    res.json({ message: "not implemented" });
 }
 
 export default { createUser, getUser, editUser, deleteUser };

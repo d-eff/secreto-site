@@ -1,14 +1,14 @@
 import express from 'express'; 
 import db from './db';
 import routes from './routes'
+import cookieParser from 'cookie-parser';
 const app = express();
 const port = 3000;
 
 db.authenticate().then(() => {
   console.log('Connection has been established successfully.');
   
-  db.sync()
-
+  app.use(cookieParser());
   app.use(express.json());
   app.use('/api', routes);
 

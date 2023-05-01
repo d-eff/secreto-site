@@ -1,7 +1,8 @@
 import { Sequelize } from 'sequelize';
 import * as models from './models';
+import dotenv from 'dotenv';
 
-require('dotenv').config()
+dotenv.config();
 
 const sequelize = new Sequelize(process.env.DATABASE_URL);
 
@@ -22,5 +23,7 @@ year.hasMany(gift);
 
 user.belongsToMany(year, {through: 'UserYear'});
 year.belongsToMany(user, {through: 'UserYear'});
+
+sequelize.sync();
 
 export default sequelize;
