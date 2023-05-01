@@ -3,43 +3,42 @@ import db from '../db';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
-async function login(req: Request, res: Response) {
-    if (!req.body.email || !req.body.password) {
-        res.json({ error: { message: 'missing fields' } });
-    }
-
-    const User = db.models.User;
-
-    const users = await User.findAll({
-        where: {
-            email: req.body.email
+async function login(req, res, next) {
+    try {
+        if (!req.body.email || !req.body.password) {
+            throw new Error("missing fields")
         }
-    });
-
-    if (users.length === 0) {
-        res.json({ error: { message: 'ah nope' } });
-    }
-
-    const foundUser = users[0];
-    const isValid = await bcrypt.compare(req.body.password, foundUser.dataValues.passhash);
-    if (!isValid) {
-        res.json({ error: { message: 'ah nope' } });
-    } else {
-        // create session token
-        try {
+        const User = db.models.User;
+    
+        const users = await User.findAll({
+            where: {
+                email: req.body.email
+            }
+        });
+    
+        if (users.length === 0) {
+            throw new Error("ah nope");
+        }
+    
+        const foundUser = users[0];
+        const isValid = await bcrypt.compare(req.body.password, foundUser.dataValues.passhash);
+        if (!isValid) {
+            throw new Error("ah nope")
+        } else {
+            // create session token
             const token = await createSession(foundUser.dataValues.id);
-            console.log("token", token)
             res.cookie("sessionToken", token.dataValues.token);
             // success!
             res.json({ message: "yer frigging logged in" });
-        } catch (e) {
-            console.error(e);
-            res.json({ error: { message: 'what' }})
         }
+    } catch (err) {
+        console.error(err);
+        next(err);
     }
+    
 }
 
-async function createSession(userId: number) {
+async function createSession(userId) {
     const token = uuidv4();
     const Session = db.models.Session;
     
@@ -60,7 +59,29 @@ async function createSession(userId: number) {
     }
 }
 
-async function logout(req: Request, res: Response) {
+async function checkToken(req, res, next) {
+    try {
+        if (!req.cookies.sessionToken) {
+            throw new Error("missing or invalid session")
+        }
+        const token = req.cookies.sessionToken;
+        const Session = db.models.Session;
+        const sessions = await Session.findAll({
+            where: {
+                token
+            }
+        });
+        if (sessions.length === 0) {
+            throw new Error("missing or invalid session")
+        }
+        console.log("TOKEN GOOD")
+        next();
+    } catch (err) {
+        return next(err);
+    }
+}
+
+async function logout(req, res) {
     if (!req.cookies.sessionToken) {
         res.json({ error: { message: "what" } });
     }
@@ -74,4 +95,4 @@ async function logout(req: Request, res: Response) {
 }
 
 
-export default { login, logout };
+export default { login, checkToken, logout };

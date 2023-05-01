@@ -12,6 +12,11 @@ db.authenticate().then(() => {
   app.use(express.json());
   app.use('/api', routes);
 
+  app.use((err, req, res, next) => {
+    console.log(err)
+    res.status(500).json({ message: err.message });
+  });      
+
   app.get('/', (req, res) => {
     //todo: serve app from here
     res.send('Hello World!');
